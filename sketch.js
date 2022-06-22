@@ -23,6 +23,7 @@ var zero_star;
 var cloud_img, cloudsGroup;
 var ground, invisible_ground, ground_img;
 var surpriseGroup, surprise_img;
+var coin;
 var coin1, coin2, coin3;
 var touches = [0, 1, 2];
 
@@ -57,7 +58,7 @@ function preload() {
   mario_running = loadAnimation("assets/mario1.png", "assets/mario2.png", "assets/mario3.png");
   mario_jumping = loadImage("assets/mariojump.png");
   mario_stop = loadImage("assets/mario1.png");
-
+  coins_img = loadImage("assets/coin.png")
   plant_eating = loadAnimation("./assets/planta1.png", "./assets/planta2.png");
   surprise_img = loadImage("./assets/surprise.png");
   coins = loadImage("./assets/coin.png");
@@ -80,10 +81,11 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
+  
 
   engine = Engine.create();
   world = engine.world;
-  mario = createSprite(90, windowHeight - 170, 20, 50);
+  mario = createSprite(90, windowHeight - 270, 20, 50);
   mario.scale = 0.35;
 
   mario.addAnimation("running", mario_running);
@@ -108,12 +110,14 @@ function setup() {
 
   invisibleGround = createSprite(50, windowHeight - 130, 400, 10);
   invisibleGround.visible = false;
-  console.log(invisibleGround.y);
+  // console.log(invisibleGround.y);
 
   plantsGroup = createGroup();
   cloudsGroup = createGroup();
   surpriseGroup = createGroup();
-  coinsGroup = createGroup();
+  //coinsGroup = createGroup();
+
+  //coinsGroup.add(spawCoins);
 
 
   rectMode(CENTER);
@@ -129,65 +133,93 @@ function draw() {
     spawPlants();
     spawSurprise();
     ground.velocityX = -3;
-    mario.addAnimation("running");
+    mario.changeAnimation(mario_running);
     mario.collide(invisibleGround);
     if (ground.x < 0) {
       ground.x = ground.width / 2;
     };
+    console.log(mario.y);
 
-    if (keyDown("space") && mario.y >= windowHeight - 39 || touches.length > 0 || touches.length > 0) {
+    /**
+     * Compare os dois ifs, há erro na inserção da imagem do mário no pulo
+     */
+    if (keyDown("space") || touches.length > 0 || touches.length > 0) {
       mario.velocityY = -12;
-      mario.addImage("jumping");
-    };
+      mario.changeAnimation("jumping", mario_jumping);
+    }
+    mario.changeAnimation("running", mario_running)
+    // if ((keyDown("space") && mario.y >= windowHeight - 39) || touches.length > 0 || touches.length > 0) {
+    //   mario.velocityY = -12;
+    //   mario.addImage(mario_jumping);
+    // };
 
     mario.velocityY = mario.velocityY + 0.8;
     mario.collide(ground);
 
+
+    if (surpriseGroup.isTouching(mario)) {
+      spawCoins();
+      star_display.addImage('one');
+     // touches[1];
+    };
+
+    // if (surpriseGroup.isTouching(mario) && touches[0]) {
+    //   coinsGroup();
+    //   star_display.addImage('one');
+    //   touches[1];
+    // };
+
+    // if (surpriseGroup.isTouching(mario) && touches[1]) {
+    //   coinsGroup();
+    //   star_display.addImage('two');
+    //   touches[2];
+    // };
+
+    // if (surpriseGroup.isTouching(mario) && touches[2]) {
+    //   coinsGroup();
+    //   star_display.addImage('tree');
+    //   gameState = WIN;
+    // };
     if (plantsGroup.isTouching(mario)) {
       gameState = END;
     };
-
-    if (surpriseGroup.isTouching(mario) && touches[0]) {
-      coinsGroup();
-      star_display.addImage('one');
-      touches[1];
-    };
-
-    if (surpriseGroup.isTouching(mario) && touches[1]) {
-      coinsGroup();
-      star_display.addImage('two');
-      touches[2];
-    };
-
-    if (surpriseGroup.isTouching(mario) && touches[1]) {
-      coinsGroup();
-      star_display.addImage('tree');
-      gameState = WIN;
-    };
-
 
   } else if (gameState === WIN) {
     win();
   }
   else if (gameState === END) {
+    mario.velocityX = 0
+    mario.velocityY = 0
+    plantsGroup.setVelocityXEach(0)
+    ground.velocityX = 0
     gameOver();
   };
 
   drawSprites();
 }
 function spawPlants() {
-  if (frameCount % 130 === 0) {
+ 
+  var aleatorio = [130, 250, 280, 430,800]
+  for (i = 0; i < aleatorio.length; i++) {
+    var numAleatorio = aleatorio[i]
+  }
+
+  if (frameCount % numAleatorio === 1) {
     var obstacle = createSprite(windowWidth, windowHeight - 125, 10, 40);
     obstacle.velocityX = -3;
     obstacle.addAnimation("death", plant_eating);
     obstacle.scale = 0.15;
-    obstacle.lifetime = 500;
+    obstacle.lifetime = windowWidth - 200;
     plantsGroup.add(obstacle);
   }
 };
 
 function spawClouds() {
-  if (frameCount % 100 === 0) {
+  var aleatorio = [130, 250, 280, 430,800]
+  for (i = 0; i < aleatorio.length; i++) {
+    var numAleatorio = aleatorio[i]
+  }
+  if (frameCount % numAleatorio === 1) {
     var cloud = createSprite(windowWidth, 120, 40, 10);
     cloud.y = Math.round(random(90, 350));
     cloud.addImage(cloud_img);
@@ -207,7 +239,7 @@ function spawSurprise() {
     gift.addImage(surprise_img);
     gift.scale = 0.15;
     gift.velocityX = -3;
-    gift.lifetime = 500;
+    gift.lifetime = windowWidth - 200;
     surpriseGroup.add(gift);
   }
 
@@ -219,15 +251,15 @@ function spawCoins() {
     frictionAir: 0,
     friction: 0.02
   }
-  coin1 = Bodies.circle(300, 300, 20, options);
-  coin1.addImage("coin", coins_img);
+  coin1 = createSprite(300, 300, 20, 20);
+  coin1.addImage(coins_img);
   coin1.scale = 0.5;
-  coin2 = Bodies.circle(300, 300, 20, options);
-  coin2.addImage("coin", coins_img);
-  coin2.scale = 0.5;
-  coin3 = Bodies.circle(300, 300, 20, options);
-  coin3.addImage("coin", coins_img);
-  coin3.scale = 0.5;
+  // coin2 = createSprite(300, 300, 20, options);
+  // coin2.addImage("coin", coins_img);
+  // coin2.scale = 0.5;
+  // coin3 = createSprite(300, 300, 20, options);
+  // coin3.addImage("coin", coins_img);
+  // coin3.scale = 0.5;
 };
 
 function win() {
