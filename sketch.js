@@ -27,6 +27,8 @@ var coin;
 var coin1, coin2, coin3;
 var touches = [0, 1, 2];
 
+var star_display
+
 var rope, fruit, ground;
 var fruit_con;
 var fruit_con_2;
@@ -63,10 +65,14 @@ function preload() {
   surprise_img = loadImage("./assets/surprise.png");
   coins = loadImage("./assets/coin.png");
 
-  one_star = loadImage("./assets/1star.png");
-  two_star = loadImage("./assets/2star.png");
-  tree_star = loadImage("./assets/3star.png");
-  zero_star = loadImage("./assets/0star.png");
+  one_star = loadAnimation("./assets/1star.png");
+  two_star = loadAnimation("./assets/2star.png");
+  tree_star = loadAnimation("./assets/3star.png");
+  zero_star = loadAnimation("./assets/0star.png");
+
+  zero_star.playing = true;
+  one_star.playing = true;
+  one_star.looping = false;
 
   cloud_img = loadImage("./assets/cloud.png");
   ground_img = loadImage("./assets/ground.png");
@@ -100,12 +106,16 @@ function setup() {
   ground.addImage("ground", ground_img);
   ground.x = ground.width / 2;
 
-  var star_display = createSprite(125, 50, 30, 30);
+  star_display = createSprite(125, 50, 30, 30);
   star_display.scale = 0.2;
-  star_display.addImage("zero", zero_star);
-  star_display.addImage("one", one_star);
-  star_display.addImage("two", two_star);
-  star_display.addImage("tree", tree_star);
+
+  star_display.addAnimation("zero", zero_star);
+  star_display.addAnimation("one", one_star);
+  star_display.changeAnimation("zero");
+  //star_display.changeAnimation("zero");
+
+  //star_display.addAnimation("two", two_star);
+  //star_display.addAnimation("tree", tree_star);
   //star_display.addImage("'empty'");
 
   invisibleGround = createSprite(50, windowHeight - 130, 400, 10);
@@ -159,7 +169,7 @@ function draw() {
 
     if (surpriseGroup.isTouching(mario)) {
       spawCoins();
-      star_display.addImage('one');
+      star_display.changeAnimation('one');
      // touches[1];
     };
 
